@@ -1,0 +1,15 @@
+
+/*edit/new page*/
+.control-medium input, .control-medium select, .control-medium textarea {
+    width: 450px;
+}
+.control-medium .error-block {
+    width: 448px;
+}
+.option_container span.error-block{
+    margin-left: 18px;
+}
+.control-medium input[type="radio"], .control-medium input[type="checkbox"] {
+    width: 10px;
+}
+

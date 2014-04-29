@@ -1,0 +1,8 @@
+{% ckan_extends %}
+
+  {% block content_primary_nav %}
+    {{ super() }}
+    {#  if has access  #}
+
+    {{ h.build_nav_icon('organization/metameta', _('Metadata'), id=c.group_dict.name) }}
+  {% endblock %}

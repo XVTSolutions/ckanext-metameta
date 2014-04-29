@@ -1,0 +1,50 @@
+{% import 'macros/form.html' as form %}
+
+{% block package_basic_fields_custom %}
+{% resource 'ckanext-metameta/organisation-changed.js' %}
+{% resource 'ckanext-metameta/metameta_textarea.js' %}
+{% set truncate_opt_length = 45 %}
+
+{% for mm in metametadata %}
+    {% set attrs = {} %}
+    {% if mm.readonly %}
+        {% set attrs={'readonly':'readonly'} if mm.readonly else {} %}
+        {% do attrs.update({'title': _(h.metameta_get_value(data, mm.key, mm.default_value)) if h.metameta_get_value(data, mm.key, mm.default_value)|length else ''}) %}
+    {% endif %}
+
+    {% if mm.field_type == 'single_choice' %}
+       <div class="control-group custom">
+        <label class="control-label" for="{{_('field-'~mm.key)}}">
+        {% if h.metameta_is_required(mm.validator) %}
+        <span class="control-required" title=
+        {{ _('Required') }}> *</span
+        >
+        {% endif %}
+        {{ _(mm.label) }}
+        </label>
+        <div class="controls">
+          <select id={{_('field-'~mm.key)}} name="{{mm.key}}" {{ form.attributes(attrs) }}
+            {% if mm.readonly %}
+                readonly = 'readonly'
+            {% else %}
+                data-module="autocomplete"
+            {% endif %}
+            >
+            {% for option in h.metameta_select_options(org_id, mm.key)  %}
+              <option value="{{ option }}" {% if option == h.metameta_get_value(data, mm.key, mm.default_value) %} selected="selected" {% elif mm.readonly %} disabled="disabled" {% endif %} {{ form.attributes({'title': _(option) if option|length else ''}) }}>{{ h.truncate(option, truncate_opt_length) }}</option>
+            {% endfor %}
+          </select>
+            {% if h.metameta_get_error(mm.key, errors) %}
+                <span class="error-block">{{_(h.metameta_get_error(mm.key, errors))}}</span>
+            {% endif %}
+        </div>
+      </div>
+   {% elif mm.field_type == 'textarea' %}
+        {{ form.markdown(mm.key, label=mm.label, id=_('field-'~mm.key), attrs=attrs, placeholder=_(mm.key), value=h.metameta_get_value(data, mm.key, mm.default_value), error=h.metameta_get_error(mm.key, errors), is_required=h.metameta_is_required(mm.validator)) }}
+   {% else %}
+        {{ form.input(mm.key, label=mm.label, id=_('field-'~mm.key), attrs=attrs, placeholder=_(mm.key), value=h.metameta_get_value(data, mm.key, mm.default_value), error=h.metameta_get_error(mm.key, errors), classes=['control-medium'], is_required=h.metameta_is_required(mm.validator)) }}
+    {% endif %}
+{% endfor %}
+{% endblock %}
+
+

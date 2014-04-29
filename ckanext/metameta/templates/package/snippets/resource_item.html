@@ -1,0 +1,15 @@
+{% ckan_extends %}
+
+<li class="resource-item" data-id="{{ res.id }}">
+  {% block resource_item_title %}
+    {{ super() }}
+  {% endblock %}
+  <p class="description">
+    {% if res.description %}
+      {{ h.markdown_extract(res.description, extract_length=10) }}
+    {% endif %}
+  </p>
+  {% block resource_item_explore %}
+    {{ super() }}
+  {% endblock %}
+</li>

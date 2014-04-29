@@ -1,0 +1,225 @@
+{% extends "group/edit_base.html" %}
+{% block styles %}
+  {{ super() }}
+  <link rel="stylesheet" href="/metameta_edit.css" />
+{% endblock %}
+{%- block scripts %}
+  {{ super() }}
+{% resource 'ckanext-metameta/metameta_edit.js' %}
+{% endblock -%}
+
+{% block subtitle %}{{ _('Meta-Metadata') }} - {{ _(c.group_dict.display_name) }} - {{ _('Organizations') }}{% endblock %}
+{{ c.group_name }}
+{% block breadcrumb_content %}
+  {% link_for _('Organization'), controller='organization', action='index' %} /
+  {% block breadcrumb_content_inner %}
+    <li class="active">{% link_for c.org_title, controller='organization', action='edit', id=c.group_name %}</li>
+  {% endblock %}
+ {% endblock %}
+
+{% block content_action %}
+  {# remove the 'view' button #}
+{% endblock %}
+
+{% block content_primary_nav %}
+   {# TODO - do something about the navigation #}
+{% endblock %}
+
+{% block secondary_content %}
+<section class="module-content">
+<p>You can configure values for the meta-metadata field that displays here.</p>
+</section>
+{% endblock %}
+
+{% block primary_content_inner %}
+{% endblock %}
+
+{% block page_primary_action %}
+  {{ super() }}
+<h1>{{ _(c.title) }}</h1>
+{% for row in c.defaults %}
+<form class="dataset-form form-horizontal"
+      method="post"
+      {% if row.id %}
+      action="/organization/metameta/edit/{{ c.group_name }}/{{ row.id }}">
+      {% else %}
+      action="/organization/metameta/new/{{ c.group_name }}">
+      {% endif %}
+    <div class="control-group control-medium">
+      <label class="control-label" for="field-key">{{ _('Field Name')  }}</label>
+      <div class="controls ">
+        <input id="field-key" type="text" name="key" value="{{ row.key }}" 
+          {% if not row.custom %}
+            readonly='readonly'
+          {% endif %}
+        placeholder="key"/>
+      {% if c.errors.key %}
+          <span class="error-block">{{ _(c.errors.key) }}</span>
+      {% endif %}
+      </div><!--controls-->
+    </div><!--control-group control-medium-->
+    <div class="control-group control-medium">
+      <label class="control-label" for="field-label">{{ _('Field Label')  }}</label>
+      <div class="controls ">
+        <input id="field-label" type="text" name="label" value="{{ row.label }}" 
+          {% if not row.custom %}
+            readonly='readonly'
+          {% endif %}
+        placeholder="label"/>
+      </div><!--controls-->
+    </div><!--control-group control-medium-->
+    <div class="control-group control-medium">
+      <label class="control-label" for="field-field_type">{{ _('Field Type')  }}</label>
+      <div class="controls ">
+        {% for key, value in h.metameta_get_field_types().items() %}
+            <label class="radio "><input id="field-field_type" type="radio" class="field_type"  name="field_type" value="{{ key }}" 
+              {% if row.field_type == key %}
+                checked='checked'
+              {% else %}
+                  {% if not row.custom %}
+                    disabled='disabled'
+                  {% endif %}
+              {% endif %}
+              {% if not row.custom %}
+                readonly='readonly'
+              {% endif %}
+            placeholder="Field Type"/>{{_(value)}}</label>
+        {% endfor %}
+      </div><!--controls-->
+    </div><!--control-group control-medium-->
+
+    {# validation #}
+    <div class="control-group control-medium field_type_text_or_area" {% if h.metameta_is_dropdown_field(row.field_type) %} style="display:none" {% endif %} >
+      <label class="control-label" for="field-validator">{{ _('Constraint')  }}</label>
+      <div class="controls ">
+        {% for key, value in h.metameta_get_validators().items() %}
+            <label class="radio "><input id="field-validator" type="radio" class="validator"  name="validator" value="{{ key }}" 
+              {% if row.validator == key %}
+                checked='checked'
+              {% else %}
+                  {% if not row.custom or (h.metameta_is_textarea_field(row.field_type) and key=="metameta_range") %}
+                    disabled='disabled'
+                  {% endif %}
+              {% endif %}
+              {% if not row.custom %}
+                readonly='readonly'
+              {% endif %}
+            placeholder="Validator"/>{{_(value)}}</label>
+        {% endfor %}
+      </div><!--controls-->
+    </div><!--control-group control-medium field_type_text_or_area-->
+
+    {# readonly #}
+    <div class="control-group control-medium" >
+      <label class="control-label" for="field-readonly">{{ _('Read Only')  }}</label>
+      <div class="controls ">
+        {% for key, value in h.metameta_get_readonly().items() %}
+            <label class="radio "><input id="field-readonly" type="radio" class="readonly"  name="readonly" value="{{ key }}" 
+              {% if row.readonly == key %}
+                checked='checked'
+              {% else %}
+                  {% if not row.custom %}
+                    disabled='disabled'
+                  {% endif %}
+              {% endif %}
+              {% if not row.custom %}
+                readonly='readonly'
+              {% endif %}
+            placeholder="Readonly"/>{{_(value)}}</label>
+        {% endfor %}
+      </div><!--controls-->
+    </div><!--control-group control-medium-->
+
+    {# range - minimum value #}
+    <div class="control-group control-medium range_group" {% if not h.metameta_is_text_field(row.field_type) or row.validator!="metameta_range" %} style="display:none" {% endif %} >
+      <label class="control-label" for="field-minimum">{{ _('Minimum Value')  }}</label>
+      <div class="controls ">
+        <input id="field-minimum" type="text" name="min_value" value="{{ row.min_value }}" 
+          {% if not row.presettable %}
+            readonly='readonly'
+          {% endif %}
+        placeholder="Minimum"/>
+      </div><!--controls-->
+    </div><!--control-group control-medium range_group-->
+
+    {# range - maximum value #}
+    <div class="control-group control-medium range_group" {% if not h.metameta_is_text_field(row.field_type) or row.validator!="metameta_range" %} style="display:none" {% endif %} >
+      <label class="control-label" for="field-maximum">{{ _('Maximum Value')  }}</label>
+      <div class="controls ">
+        <input id="field-maximum" type="text" name="max_value" value="{{ row.max_value }}" 
+          {% if not row.presettable %}
+            readonly='readonly'
+          {% endif %}
+        placeholder="Maximum"/>
+      </div><!--controls-->
+    </div><!--control-group control-medium range_group-->
+
+    {# options #}
+    <div class="control-group control-medium field_type_single_choice" {% if not h.metameta_is_dropdown_field(row.field_type) %} style="display:none" {% endif %} >
+      <label class="control-label" for="field-url">{{ _('Options')  }}</label>
+      <div class="controls">
+        <div class="option_group">
+          {% set opts = h.metameta_topoffwith(row.option_value, row.default_value)  %}
+          {% for opt in opts  %}
+            <div class="option_container">
+                <input id="field-default_value_radio" type="radio" title={{ _('Tick as a default value')}} name="default_value_radio" class="" value="" 
+                      {% if row.default_value == opt %}
+                        checked='checked'
+                      {% endif %}
+                        placeholder=""/>
+                <input id="field-option_value" type="text" name="option_value[]" value="{{ opt }}"
+                      {% if not row.custom %}
+                        readonly='readonly'
+                      {% endif %}
+                        placeholder="option_value"/>
+                  {% if row.custom %}
+                    <span class='btn btn-danger btn-small text-error icon-minus-sign' title={{_('Delete')}}></span>
+                  {% endif %}
+                <div class="clearfix"></div>
+            </div><!--class="option_container"-->
+          {% endfor %}
+          {% if row.custom %}
+            {# for new option field #}
+            <div class="option_container">
+                <input id="field-default_value_radio" type="radio" title={{_('Tick as a default value')}} name="default_value_radio" class="" value="" 
+                        placeholder=""/>
+                <input id="field-option_value" type="text" name="option_value[]" value=""
+                        placeholder="option_value"/>
+                <span class='btn btn-danger btn-small text-error icon-minus-sign' title={{_('Delete')}} ></span>
+                <div class="clearfix"></div>
+            </div><!--class="option_container"-->
+          {% endif %}
+          </div><!--class="option_group"-->
+        <br />
+          {% if row.custom %}
+            <span class='btn btn-primary btn-small text-info icon-plus-sign' title={{ _('Add')  }} ></span>
+          {% endif %}
+      </div><!--controls-->
+    </div><!--control-group control-medium field_type_single_choice-->
+
+    {# default value #}
+    <div class="control-group control-medium field_type_text_or_area"  {% if h.metameta_is_dropdown_field(row.field_type) %} style="display:none" {% endif %}>
+      <label class="control-label" for="field-default_value">{{ _('Default Value')  }}</label>
+      <div class="controls" >
+        <textarea id="field-default_value" name="default_value" cols="20" rows="5"
+      {% if not row.presettable %}
+        readonly='readonly'
+      {% endif %}
+placeholder="default_value"/>{{ row.default_value }}</textarea>
+      </div><!--controls-->
+    </div><!--control-group control-medium field_type_text_or_area-->
+
+    {# buttons #}
+    </br><a class="btn btn-secondary" href="/organization/metameta/{{c.group_name}}"><i class="icon-home"></i>{{ _('Go Back to Index')  }}</a>
+    <button id="submit_form" class="btn btn-primary" type="submit" name="save">
+      {% if row.id %}
+        {{ _('Update')  }}
+      {% else %}
+        {{ _('Save')  }}
+      {% endif %}
+    </button>
+</form>
+{% endfor %}
+{% endblock %}
+
+

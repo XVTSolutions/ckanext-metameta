@@ -1,0 +1,11 @@
+.control-full .select2-container {
+    width: 100% !important;
+}
+
+.control-group.error.control-full .select2-container .select2-choices {
+    border-color: #C6898B;
+}
+.control-group.custom select{
+    width:320px;
+}
+

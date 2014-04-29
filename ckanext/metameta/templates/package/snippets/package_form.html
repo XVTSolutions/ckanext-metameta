@@ -1,0 +1,35 @@
+{% ckan_extends %}
+
+{% block stages %}
+{{ h.snippet('package/snippets/meta_stages.html', stages=stage) }}
+{% endblock %}
+
+{% block errors %}
+    {{ form.errors(h.metameta_convert_error_keys(error_summary)) }}
+{% endblock %}
+
+  {% block basic_fields %}
+    {% snippet 'package/snippets/meta_package_basic_fields.html', current_action=c.action, data=data, errors=errors, licenses=c.licenses, groups_available=c.groups_available %}
+  {% endblock %}
+
+{% block metadata_fields %}
+{# always disable #}
+{% endblock %}
+
+
+  {% block form_actions %}
+    <div class="form-actions">
+      {% block disclaimer %}
+        {{ super() }}
+      {% endblock %}
+      {% block delete_button %}
+        {{ super() }}
+      {% endblock %}
+        {% block save_button %}
+            <button data-module='meta_save' data-module-action="{{c.action}}" class="btn btn-primary" type="submit" name="save">
+            {% block save_button_text %}{{ super() }}{% endblock %}
+            </button>
+        {% endblock %}
+      {{ form.required_message() }}
+    </div>
+  {% endblock %}

@@ -1,0 +1,17 @@
+{% ckan_extends %}
+
+{# Remove 'free extras' from the package form. If you're using
+convert_to/from_extras() as we are with our 'related_dataset_info' field below then
+you need to remove free extras from the form, or editing your custom field
+won't work. #}
+{% block custom_fields %}
+{% endblock %}
+
+{% block package_metadata_fields %}
+
+  {% block package_additional_info %}
+    <p class='flash-messages alert'> Please check the below table and confirm by clicking the finish button at the bottom </p>
+    {% snippet "package/snippets/meta_package_info.html", pkg_dict=data, show_basic=true %}
+  {% endblock %}
+
+{% endblock %}

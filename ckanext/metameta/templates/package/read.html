@@ -1,0 +1,15 @@
+{% ckan_extends %}
+
+    {% block package_notes %}
+    {% set truncate_notes = truncate_notes or 80 %}
+      {% if c.pkg_notes_formatted %}
+        <div class="notes embedded-content">
+          {{ h.metameta_markdown_wrap(c.pkg_notes_formatted, extract_length=truncate_notes) }}
+        </div>
+      {% endif %}
+    {% endblock %}
+
+  {% block package_additional_info %}
+    {% snippet "package/snippets/meta_package_info.html", show_basic=false, pkg_dict=pkg %}
+  {% endblock %}
+

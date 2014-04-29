@@ -1,0 +1,181 @@
+{% import 'macros/form.html' as form %}
+{% resource 'fanstatic/jquery-ui.css' %}
+{% resource 'fanstatic/jquery-ui.js' %}
+{% resource 'fanstatic/datepicker-module.js' %}
+
+{% set metametadata1 = h.metameta_get_data(data, sort_order_from=1, sort_order_to=10) %}
+{% set metametadata2 = h.metameta_get_data(data, sort_order_from=11, sort_order_to=100) %}
+{% set metametadata3 = h.metameta_get_data(data, sort_order_from=101) %}
+{% set org_id = data.owner_org or data.group_id %}
+{% set dataset_is_draft = data.get('state', 'draft').startswith('draft') or data.get('state', 'none') ==  'none' %}
+{% set dataset_has_organization = data.owner_org or data.group_id %}
+{% set organizations_available = h.organizations_available('create_dataset') %}
+{% set user_is_sysadmin = h.check_access('sysadmin') %}
+{% set show_organizations_selector = organizations_available and (user_is_sysadmin or dataset_is_draft) %}
+{% set show_visibility_selector = dataset_has_organization or (organizations_available and (user_is_sysadmin or dataset_is_draft)) %}
+
+{% block package_basic_fields_title %}
+  {% if show_organizations_selector %}
+    {% if request.method == 'GET' and current_action == 'new' and not (request.params|length or request.params.group|length) %}
+        {% if not (data.owner_org and data.group_id) and organizations_available|length %}
+            {# when showing newly dataset not beloging to any organization at the first time, redirect to the creation page to the top organization page in order to attach custom metadata information to it #}
+            {{ h.redirect_to(controller='package', action='new', group=(organizations_available|first).id) }}
+        {% endif %}
+    {% endif %}
+    {% set existing_org = data.owner_org or data.group_id %}
+    <div style="border-bottom: 1px solid #E5E5E5; margin-bottom: 20px;">
+	    <div class="control-group">
+	      <label for="field-organizations" class="control-label">{{ _('Organization') }}</label>
+	      <div class="controls"  data-module="organisation-changed">
+	        <select id="field-organizations" name="owner_org" data-module="autocomplete" {# disabled="disabled" #}>
+	          {% if h.check_config_permission('create_unowned_dataset') %}
+	             <option value="" {% if not existing_org %} selected="selected" {% endif %}>{{ _('No organization') }}</option>
+	          {% endif %}
+	          {% for organization in organizations_available %}
+	            {# get out first org from users list only if there is not an existing org #}
+	            {% set selected_org = (existing_org and existing_org == organization.id)%}
+	            <option value="{{ organization.id }}" {% if selected_org %} selected="selected" {% endif %}>{{ organization.name }}</option>
+	          {% endfor %}
+	        </select>
+	      </div>
+	    </div>
+    </div>
+    <!--<input type="hidden" name="owner_org" value="{{existing_org}}">-->
+  {% endif %}
+  {{ form.input('title', id='field-title', label=_('Title'), placeholder=_('eg. A descriptive title'), value=data.title, error=errors.title, classes=['control-full', 'control-large'], attrs={'data-module': 'slug-preview-target'}) }}
+{% endblock %}
+
+{% block package_basic_fields_url %}
+  {% set prefix = h.url_for(controller='package', action='read', id='') %}
+  {% set domain = h.url_for(controller='package', action='read', id='', qualified=true) %}
+  {% set domain = domain|replace("http://", "")|replace("https://", "") %}
+  {% set attrs = {'data-module': 'slug-preview-slug', 'data-module-prefix': domain, 'data-module-placeholder': '<dataset>'} %}
+
+  {{ form.prepend('name', id='field-name', label=_('URL'), prepend=prefix, placeholder=_('eg. my-dataset'), value=data.name, error=errors.name, attrs=attrs, is_required=true) }}
+{% endblock %}
+
+{% block package_basic_fields_description %}
+  {{ form.markdown('notes', id='field-notes', is_required=False, label=_('Description'), placeholder=_('eg. Some useful notes about the data'), value=data.notes, error=errors.notes) }}
+{% endblock %}
+
+
+{% block meta_custom_fields_1 %}
+{% snippet 'package/snippets/meta_package_custom_fields.html', data=data, errors=errors, org_id=org_id, metametadata=metametadata1 %}
+{% endblock %}
+
+
+
+{% block package_metadata_author %}
+{{ form.input('author', label=_('Author'), id='field-author', placeholder=_('Joe Bloggs'), value=data.author, error=errors.author, classes=['control-medium']) }}
+
+{{ form.input('author_email', label=_('Author Email'), id='field-author-email', placeholder=_('joe@example.com'), value=data.author_email, error=errors.author_email, classes=['control-medium']) }}
+{% endblock %}
+
+{% block package_metadata_fields_maintainer %}
+
+{% set maintainers = h.metadata_get_maintainers(data) %}
+{% if maintainers|length %}
+
+    {{ form.select('maintainer', id='field-maintainer', classes=['control-medium'], attrs={placeholder:_('Maintainer')}, label=_('Maintainer'), options=maintainers, selected=data.maintainer, error=errors.maintainer) }}
+
+    <!--{{ form.input('maintainer_email', label=_('Maintainer Email'), id='field-maintainer-email', placeholder=_('joe@example.com'), value=data.maintainer_email, error=errors.maintainer_email, classes=['control-medium']) }}-->
+{% else %}
+    {{ form.input('maintainer', label=_('Maintainer'), id='field-maintainer', placeholder=_('Joe Bloggs'), value=data.maintainer, error=errors.maintainer, classes=['control-medium']) }}
+
+    {{ form.input('maintainer_email', label=_('Maintainer Email'), id='field-maintainer-email', placeholder=_('joe@example.com'), value=data.maintainer_email, error=errors.maintainer_email, classes=['control-medium']) }}
+{% endif %}
+{% endblock %}
+
+
+{% block package_metadata_fields_url %}
+{{ form.input('url', label=_('Source'), id='field-url', placeholder=_('http://example.com/dataset.json'), value=data.url, error=errors.url, classes=['control-medium']) }}
+{% endblock %}
+
+{% block package_metadata_fields_version %}
+{{ form.input('version', label=_('Version'), id='field-version', placeholder=_('1.0'), value=data.version, error=errors.version, classes=['control-medium']) }}
+{% endblock %}
+
+{% block meta_visibility %}
+  {% if show_organizations_selector and show_visibility_selector %}
+    <div data-module="dataset-visibility">
+  {% endif %}
+  {% if show_visibility_selector %}
+    {% block package_metadata_fields_visibility %}
+      <div class="control-group">
+        <label for="field-private" class="control-label">{{ _('Visibility') }}</label>
+        <div class="controls">
+          <select id="field-private" name="private">
+            {% for option in [('True', _('Private')), ('False', _('Public'))] %}
+            <option value="{{ option[0] }}" {% if option[0] == data.private|trim %}selected="selected"{% endif %}>{{ option[1] }}</option>
+            {% endfor %}
+          </select>
+        </div>
+      </div>
+    {% endblock %}
+  {% endif %}
+  {% if show_organizations_selector and show_visibility_selector %}
+    </div>
+  {% endif %}
+{% endblock %}
+
+{% block package_basic_fields_tags %}
+{% block styles %}
+  <link rel="stylesheet" href="/meta_edit.css" />
+{% endblock %}
+  {% set tag_attrs = {'data-module': 'autocomplete', 'data-module-tags': '', 'data-module-source': '/api/2/util/tag/autocomplete?incomplete=?'} %}
+  {{ form.input('tag_string', id='field-tags', is_required=False, label=_('Tags'), placeholder=_('eg. economy, mental health, government'), value=data.tag_string, error=errors.tags or errors.tag_string, classes=['control-full'], attrs=tag_attrs) }}
+{% endblock %}
+
+{% block meta_custom_fields_2 %}
+{% snippet 'package/snippets/meta_package_custom_fields.html', data=data, errors=errors, org_id=org_id, metametadata=metametadata2 %}
+{% endblock %}
+
+
+{% block package_basic_fields_license %}
+<div class="control-group">
+  {% set error = errors.license_id %}
+  <label class="control-label" for="field-license">{{ _("License") }}</label>
+  <div class="controls">
+    <select id="field-license" name="license_id" data-module="autocomplete">
+      {% for license_desc, license_id in licenses|sort if license_desc  %}
+        <option value="{{ license_id }}" {% if data.get('license_id', 'notspecified') == license_id %}selected="selected"{% endif %}>{{ license_desc }}</option>
+      {% endfor %}
+    </select>
+    {% if error %}<span class="error-block">{{ error }}</span>{% endif %}
+    <span class="info-block info-inline">
+      <i class="icon-info-sign"></i>
+      {% trans %}
+        License definitions and additional information can be found
+        at <a href="http://opendefinition.org/licenses/">opendefinition.org</a>
+      {% endtrans %}
+    </span>
+  </div>
+</div>
+{% endblock %}
+
+
+{% block meta_custom_fields_3 %}
+{% snippet 'package/snippets/meta_package_custom_fields.html', data=data, errors=errors, org_id=org_id, metametadata=metametadata3 %}
+{% endblock %}
+
+
+
+{% block package_basic_fields_org %}
+  {# if we have a default group then this wants remembering #}
+  {% if data.group_id %}
+    <input type="hidden" name="groups__0__id" value="{{ data.group_id }}" />
+  {% endif %}
+
+  {% if data.id and h.check_access('package_delete', {'id': data.id}) and data.state != 'active' %}
+    <div class="control-group">
+      <label for="field-state" class="control-label">{{ _('State') }}</label>
+      <div class="controls">
+        <select id="field-state" name="state">
+          <option value="active" {% if data.get('state', 'none') == 'active' %} selected="selected" {% endif %}>{{ _('Active') }}</option>
+          <option value="deleted" {% if data.get('state', 'none') == 'deleted' %} selected="selected" {% endif %}>{{ _('Deleted') }}</option>
+        </select>
+      </div>
+    </div>
+  {% endif %}
+
+{% endblock %}

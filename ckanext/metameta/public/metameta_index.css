@@ -1,0 +1,18 @@
+/*index page*/
+.wrapper{
+    background: none repeat-y scroll 0 0 #FFFFFF;
+}
+[role="main"] .primary {
+    width: 100%;
+}
+[role="main"] .secondary {
+    display: none;
+    width: 0%;
+}
+.table thead th.short{
+    width   :   95px;
+}
+.table thead th.btn-col{
+    width   :   90px;
+}
+
