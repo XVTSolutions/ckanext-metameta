@@ -13,7 +13,7 @@ from pytz import timezone
 from ckan.lib.helpers import date_str_to_datetime
 from ckan.common import _
 from ckan import model
-from sqlalchemy import Table, Column, types, ForeignKey
+from sqlalchemy import Table, Column, types, ForeignKey, select
 from ckan.model.meta import metadata
 from ckan.model.types import make_uuid
 from ckan.model import Session
@@ -860,6 +860,17 @@ def notify_maintainer(pkg_dict, maintainer):
     activity_object_id = pkg_dict.get('id')
     if not activity_object_id:
         return
+
+    #modification check
+    package = model.Package.get(activity_object_id)
+    package_revision = model.package.package_revision_table
+    cols = [package_revision.c.maintainer, package_revision.c.metadata_modified]
+    sql = select(cols, from_obj=[package_revision]).where(package_revision.c.id == activity_object_id).order_by(package_revision.c.revision_timestamp.desc())
+    rows = model.Session.execute(sql).fetchall()
+    if rows[0]['metadata_modified'] != package.metadata_modified:
+        return #no updated content in package table, including maintainer
+    if len(rows) > 1 and rows[1]['maintainer'] == maintainer.name:
+        return #if maintainer is the same as before
 
     #retrieve package data as activity_data
     try:
