@@ -77,7 +77,7 @@ this.ckan.module('metameta-image-upload', function($, _) {
         .insertAfter(this.button_upload);
 
       this.upload_filename = $('<input type="text" id="upload_filename" readonly="readonly"/>')
-        .val(options.url.split('/').pop())
+        .val(options.url.split('/').pop().split('\\').pop())
         .insertBefore(this.button_remove);
 
       // Button for resetting the form when there is a URL set
@@ -175,7 +175,7 @@ this.ckan.module('metameta-image-upload', function($, _) {
      */
     _onInputChange: function() {
       this.file_name = this.input.val();
-      this.upload_filename.val(this.file_name);
+      this.upload_filename.val(this.file_name.split('/').pop().split('\\').pop());
       this.field_clear.val('');
       this.changeState(this.state.attached);
     },
