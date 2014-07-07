@@ -17,7 +17,7 @@ class MetametaController(BaseController):
 
     def index(self, id):
         """
-          main page for editing metametadata fields
+          main page for editing metadata fields
         """
 
         data_dict = {'id': id}
@@ -46,7 +46,7 @@ class MetametaController(BaseController):
         if not edit_org:
             self.send_to_org_page()
 
-        #if metametadata default have not been set before, the org will not have
+        #if metadata default have not been set before, the org will not have
         #any entries in metamenta table - create them
         if not org_has_defaults(org_id):
             init_metadata(org_id)
@@ -125,7 +125,7 @@ class MetametaController(BaseController):
                     else:
                         #remove all options
                         remove_metameta_options(org_id, search_key, None)
-                    h.flash_success(_("The meta metadata field has been updated."))
+                    h.flash_success(_("The metadata field has been updated."))
                     self.send_to_index_page(id)
                 except StopOnError, e:
                     h.flash_error(_('Validation Error'))
@@ -137,7 +137,7 @@ class MetametaController(BaseController):
         plugins.toolkit.c.org_id = org_id
         plugins.toolkit.c.defaults = defaults
         plugins.toolkit.c.group_name = id
-        plugins.toolkit.c.title = _('Edit Meta-Metadata Field')
+        plugins.toolkit.c.title = _('Edit Metadata Field')
 
         if org_details:
             plugins.toolkit.c.org_title = _(org_details['display_name'])
@@ -204,7 +204,7 @@ class MetametaController(BaseController):
                     else:
                         #remove all options
                         remove_metameta_options(org_id, search_key, None)
-                    h.flash_success(_("New meta metadata field has been created."))
+                    h.flash_success(_("New metadata field has been created."))
                     self.send_to_index_page(id)
                 except StopOnError, e:
                     h.flash_error(_('Validation Error'))
@@ -216,7 +216,7 @@ class MetametaController(BaseController):
 
         plugins.toolkit.c.org_id = org_id
         plugins.toolkit.c.group_name = id
-        plugins.toolkit.c.title = _('Create New Meta-Metadata Field')
+        plugins.toolkit.c.title = _('Create New Metadata Field')
         plugins.toolkit.c.defaults = defaults
         if org_details:
             plugins.toolkit.c.org_title = _(org_details['display_name'])
@@ -258,7 +258,7 @@ class MetametaController(BaseController):
                     state_label = 'de-activated'
                     if is_active(state):
                         state_label = 'activated'
-                    h.flash_success(_("The meta metadata field has been %s."%(state_label)))
+                    h.flash_success(_("The metadata field has been %s."%(state_label)))
                     self.send_to_index_page(id)
                 except StopOnError, e:
                     h.flash_error(_('An error occurred: [%s]'%(str(e))))

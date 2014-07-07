@@ -8,7 +8,7 @@
 {% resource 'ckanext-metameta/metameta_edit.js' %}
 {% endblock -%}
 
-{% block subtitle %}{{ _('Meta-Metadata') }} - {{ _(c.group_dict.display_name) }} - {{ _('Organizations') }}{% endblock %}
+{% block subtitle %}{{ _('Metadata') }} - {{ _(c.group_dict.display_name) }} - {{ _('Organizations') }}{% endblock %}
 {{ c.group_name }}
 {% block breadcrumb_content %}
   {% link_for _('Organization'), controller='organization', action='index' %} /
@@ -27,7 +27,7 @@
 
 {% block secondary_content %}
 <section class="module-content">
-<p>You can configure values for the meta-metadata field that displays here.</p>
+<p>You can configure values for the metadata field that displays here.</p>
 </section>
 {% endblock %}
 
