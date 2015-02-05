@@ -160,12 +160,12 @@ def init_metadata(org_id):
         if not key or len(key)==0:
             continue
         print '********key=%s*******'%(key)
-        cmetamenta_key = add_prefix_key(key)
+        metameta_key = add_prefix_key(key)
 
         #check whether key exists or not
         key_exists = False
         for record in records:
-            if record['key']==cmetamenta_key:
+            if record['key']==metameta_key:
                 key_exists = True
                 break
 
@@ -174,12 +174,12 @@ def init_metadata(org_id):
             #check field type
             if values.get('field_type') == field_type_single_choice:
 
-                presets = get_metameta_options_preset(cmetamenta_key)
-                update_metameta_options(org_id, cmetamenta_key, presets)
+                presets = get_metameta_options_preset(metameta_key)
+                update_metameta_options(org_id, metameta_key, presets)
             update_count += 1
 
             #create a record for a text field
-            sql = sql + " ('%s', '%s', '%s', '%s', '%s', '%s', '%s', %r, %r, %r, '%s', %f, %f, %d, '%s'),"%(str(uuid.uuid4()), org_id, cmetamenta_key, values.get('default_value'), values.get('label'), values.get('validator'), values.get('state'), str(values.get('custom')), str(values.get('presettable')), str(values.get('readonly')), values.get('field_type'), 0.0, 0.0, int(values.get('sort_order')), datetime.datetime.utcnow().isoformat())
+            sql = sql + " ('%s', '%s', '%s', '%s', '%s', '%s', '%s', %r, %r, %r, '%s', %f, %f, %d, '%s'),"%(str(uuid.uuid4()), org_id, metameta_key, values.get('default_value'), values.get('label'), values.get('validator'), values.get('state'), str(values.get('custom')), str(values.get('presettable')), str(values.get('readonly')), values.get('field_type'), 0.0, 0.0, int(values.get('sort_order')), datetime.datetime.utcnow().isoformat())
 
     if update_count > 0:
         sql = sql[:-1]
@@ -477,7 +477,7 @@ def get_maintainers(data):
 """
 Validator Definition
 """
-def metamenta_notes_length(key, data, errors, context):
+def metameta_notes_length(key, data, errors, context):
     max_length = 255
     min_length = 1
     value = data.get(key)

@@ -47,7 +47,7 @@ class MetametaController(BaseController):
             self.send_to_org_page()
 
         #if metadata default have not been set before, the org will not have
-        #any entries in metamenta table - create them
+        #any entries in metameta table - create them
         if not org_has_defaults(org_id):
             init_metadata(org_id)
 
