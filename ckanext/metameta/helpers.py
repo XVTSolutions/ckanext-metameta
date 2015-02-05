@@ -604,9 +604,9 @@ def convert_error_keys(errors):
     return errors
 
 def is_metameta_validator(validator):
-    if validator:
+    if len(validator):
         return validator.startswith(_prefix)
-    return validator
+    return False
 
 def validator_label(validator):
     return get_validators()[validator]
